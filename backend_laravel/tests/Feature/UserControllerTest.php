@@ -31,7 +31,7 @@ class UserControllerTest extends TestCase
         ]);
     }
 
-    public function testUserUpdate()
+    public function testUpdateUser()
     {
         $user = User::factory()->create();
 
@@ -44,7 +44,12 @@ class UserControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'User updated successfully'
+                'message' => 'User updated successfully',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => 'Jane Doe',
+                    'email' => 'janedoe@example.com'
+                ]
             ]);
 
         $this->assertDatabaseHas('users', [
@@ -53,6 +58,7 @@ class UserControllerTest extends TestCase
             'email' => 'janedoe@example.com'
         ]);
     }
+
 
     public function testUserDeletion()
     {
