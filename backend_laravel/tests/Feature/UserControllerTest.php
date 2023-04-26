@@ -33,9 +33,9 @@ class UserControllerTest extends TestCase
 
     public function testUpdateUser()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create()->first();
 
-        $response = $this->put('/users/'.$user->id, [
+        $response = $this->put('/users/' . $user->id, [
             'name' => 'Jane Doe',
             'email' => 'janedoe@example.com',
             'password' => 'password',
@@ -62,9 +62,9 @@ class UserControllerTest extends TestCase
 
     public function testUserDeletion()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create()->first();
 
-        $response = $this->delete('/users/'.$user->id);
+        $response = $this->delete('/users/' . $user->id);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -74,13 +74,18 @@ class UserControllerTest extends TestCase
         $this->assertDeleted('users', [
             'id' => $user->id,
         ]);
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
+        ]);
     }
+
 
     public function testUserRetrieval()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create()->first();
 
-        $response = $this->get('/users/'.$user->id);
+        $response = $this->get('/users/' . $user->id);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -93,7 +98,7 @@ class UserControllerTest extends TestCase
 
     public function testUserListRetrieval()
     {
-        $users = User::factory()->count(3)->create();
+        User::factory()->count(3)->create();
 
         $response = $this->get('/users');
 
