@@ -11,108 +11,113 @@ class UserControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testUserRegistration()
+    /**
+     * Test untuk menampilkan daftar user
+     */
+    public function testIndex()
     {
-        $response = $this->post('/users', [
-            'name' => 'John Doe',
-            'email' => 'johndoe@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password'
-        ]);
+        $response = $this->get('/users');
 
-        $response->assertStatus(201)
-            ->assertJson([
-                'message' => 'User registered successfully'
-            ]);
-
-        $this->assertDatabaseHas('users', [
-            'name' => 'John Doe',
-            'email' => 'johndoe@example.com'
-        ]);
+        $response->assertStatus(200);
+        $response->assertViewIs('loaduser');
+        $response->assertViewHas('users');
     }
 
-    public function testUpdateUser()
-    {
-        $user = User::factory()->create()->first();
-
-        $response = $this->put('/users/' . $user->id, [
-            'name' => 'Jane Doe',
-            'email' => 'janedoe@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password'
-        ]);
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'User updated successfully',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => 'Jane Doe',
-                    'email' => 'janedoe@example.com'
-                ]
-            ]);
-
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'name' => 'Jane Doe',
-            'email' => 'janedoe@example.com'
-        ]);
-    }
-
-
-    public function testUserDeletion()
-    {
-        $user = User::factory()->create()->first();
-
-        $response = $this->delete('/users/' . $user->id);
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'User deleted successfully'
-            ]);
-
-        $this->assertDeleted('users', [
-            'id' => $user->id,
-        ]);
-
-        $this->assertDatabaseMissing('users', [
-            'id' => $user->id,
-        ]);
-    }
-
-
-    public function testUserRetrieval()
+    /**
+     * Test untuk menampilkan detail user
+     */
+    public function testShow()
     {
         $user = User::factory()->create()->first();
 
         $response = $this->get('/users/' . $user->id);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'users' => [
-                    'name' => $user->name,
-                    'email' => $user->email
-                ]
-            ]);
+        $response->assertStatus(200);
+        $response->assertJson([
+            'users' => [
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ]);
     }
 
-    public function testUserListRetrieval()
+    /**
+     * Test untuk menampilkan halaman tambah user
+     */
+    public function testShowAdd()
     {
-        User::factory()->count(3)->create();
+        $response = $this->get('/users/add');
 
-        $response = $this->get('/users');
+        $response->assertStatus(200);
+        $response->assertViewIs('adduser');
+    }
 
-        $response->assertStatus(200)
-            ->assertJsonCount(3, 'users')
-            ->assertJsonStructure([
-                'users' => [
-                    '*' => [
-                        'name',
-                        'email',
-                        'created_at',
-                        'updated_at'
-                    ]
-                ]
-            ]);
+    /**
+     * Test untuk menyimpan data user baru
+     */
+    public function testStore()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+
+        $response = $this->post('/users/add', $data);
+
+        $response->assertRedirect('/users');
+        $this->assertDatabaseHas('users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+        ]);
+    }
+
+    /**
+     * Test untuk menampilkan halaman update user
+     */
+    public function testShowUpdate()
+    {
+        $user = User::factory()->create()->first();
+
+        $response = $this->get('/users/' . 'edit/' . $user->id);
+
+        $response->assertStatus(200);
+        $response->assertViewIs('updateuser');
+        $response->assertViewHas('user', $user);
+    }
+
+    /**
+     * Test untuk mengupdate data user
+     */
+    public function testUpdate()
+    {
+        $user = User::factory()->create()->first();
+
+        $data = [
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+        ];
+
+        $response = $this->put('/users/' . $user->id, $data);
+
+        $response->assertRedirect('/users');
+        $this->assertDatabaseHas('users', [
+            'name' => 'Jane Doe',
+            'email' => 'jane.doe@example.com',
+        ]);
+    }
+
+    /**
+     * Test untuk menghapus user
+     */
+    public function testDestroy()
+    {
+        $user = User::factory()->create()->first();
+
+        $response = $this->delete('/users/' . $user->id);
+
+        $response->assertRedirect('/users');
+        $this->assertDeleted($user);
     }
 }
