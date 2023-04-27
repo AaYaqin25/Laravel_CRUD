@@ -18,12 +18,16 @@ Route::get('/csrf_token', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::get('/users', [UserController::class, 'index']);
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+Route::get('/users/add', [UserController::class, 'showadd'])->name('users.store');
+
+Route::get('/users/edit/{id}', [UserController::class, 'showupdate'])->name('users.edit');
 
 Route::get('/users/{id}', [UserController::class, 'show']);
 
-Route::post('/users', [UserController::class, 'store']);
+Route::post('/users/add', [UserController::class, 'store'])->name('users.create');
 
-Route::put('/users/{id}', [UserController::class, 'update']);
+Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
+Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete');

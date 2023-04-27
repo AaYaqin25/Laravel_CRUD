@@ -14,9 +14,9 @@ class UserController extends Controller
     {
         try {
             $users = User::all();
-            return response()->json(['users' => $users], 200);
+            return view('loaduser', ['users' => $users]);
         } catch (\Throwable $th) {
-            return response()->json($th, 500);
+            return redirect()->back()->with('error', 'Failed to delete user');
         }
     }
 
@@ -30,6 +30,14 @@ class UserController extends Controller
         }
     }
 
+    public function showadd()
+    {
+        try {
+            return view('adduser');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Failed to delete user');
+        }
+    }
     public function store(Request $request)
     {
         try {
@@ -40,20 +48,31 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                return redirect()->back()->withErrors($validator)->withInput();
             }
+
             $user = new User();
             $user->name = $request->input('name');
             $user->email = $request->input('email');
             $user->password = Hash::make($request->input('password'));
             $user->save();
 
-            return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+            return redirect()->route('users.index')->with('success', 'User added successfully');
         } catch (\Throwable $th) {
-            return response()->json($th, 500);
+            return redirect()->back()->with('error', 'Failed to delete user');
         }
     }
 
+    public function showupdate($id)
+    {
+        try {
+            $user = User::find($id);
+            return view('updateuser', ['user' => $user]);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Failed to delete user');
+
+        }
+    }
     public function update(Request $request, $id)
     {
         try {
@@ -64,12 +83,11 @@ class UserController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-                'password' => 'required|string|min:8|confirmed',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $id
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                return redirect()->back()->withErrors($validator)->withInput();
             }
 
             $user->name = $request->input('name');
@@ -77,10 +95,10 @@ class UserController extends Controller
             $user->password = Hash::make($request->input('password'));
             $user->save();
 
-            return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+            return redirect()->route('users.index')->with('success', 'User updated successfully');
 
         } catch (\Throwable $th) {
-            return response()->json($th, 500);
+            return redirect()->back()->with('error', 'Failed to delete user');
         }
     }
 
@@ -89,11 +107,11 @@ class UserController extends Controller
         try {
             $user = User::destroy($id);
             if (!$user) {
-                return response()->json(['error' => 'User not found'], 404);
+                return redirect()->back()->with('error', 'User not found');
             }
-            return response()->json(['message' => 'User deleted successfully'], 200);
+            return redirect()->route('users.index')->with('success', 'User deleted successfully');
         } catch (\Throwable $th) {
-            return response()->json($th, 500);
+            return redirect()->back()->with('error', 'Failed to delete user');
         }
     }
 }
