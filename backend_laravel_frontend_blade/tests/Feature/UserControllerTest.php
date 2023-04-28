@@ -20,12 +20,25 @@ class UserControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertViewIs('loaduser');
-        $response->assertViewHas('users');
     }
 
     /**
      * Test untuk menampilkan detail user
      */
+
+    public function testShowDataTables()
+    {
+        $response = $this->get(route('users.data'));
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data',
+                'draw',
+                'recordsFiltered',
+                'recordsTotal',
+            ]);
+    }
+
     public function testShow()
     {
         $user = User::factory()->create()->first();
@@ -115,7 +128,7 @@ class UserControllerTest extends TestCase
     {
         $user = User::factory()->create()->first();
 
-        $response = $this->delete('/users/' . $user->id);
+        $response = $this->get('/users/' . "delete/" . $user->id);
 
         $response->assertRedirect('/users');
         $this->assertDeleted($user);
