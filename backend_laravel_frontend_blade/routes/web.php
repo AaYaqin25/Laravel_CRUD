@@ -20,6 +20,8 @@ Route::get('/csrf_token', function () {
 
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
+Route::get('/users/data', [UserController::class, 'showDataTables'])->name('users.data');
+
 Route::get('/users/add', [UserController::class, 'showadd'])->name('users.store');
 
 Route::get('/users/edit/{id}', [UserController::class, 'showupdate'])->name('users.edit');
@@ -30,4 +32,4 @@ Route::post('/users/add', [UserController::class, 'store'])->name('users.create'
 
 Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 
-Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.delete');
+Route::get('/users/delete/{id}', [UserController::class, 'destroy'])->name('users.delete');

@@ -7,7 +7,7 @@
             <a href="{{ route('users.store') }}" class="btn btn-primary">Tambah User</a>
         </div>
         <div class="card-body">
-            <table class="table">
+            <table class="table" id="users-table">
                 <thead>
                     <tr class="table-secondary">
                         <th>No</th>
@@ -17,33 +17,15 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach ($users as $key => $user)
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>******</td>
-                            <td>
-                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-success">Edit</a>
-                                <button class="btn btn-danger"
-                                    onclick="confirmDelete({{ $user->id }})">Delete</button>
-                                <form id="delete-user-{{ $user->id }}"
-                                    action="{{ route('users.delete', $user->id) }}" method="POST"
-                                    style="display: none;">
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
             </table>
         </div>
     </div>
 </div>
 
 @include('./partials/footer')
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     function confirmDelete(userId) {
         var confirmation = confirm("Are you sure you want to delete this user?");
@@ -53,4 +35,46 @@
             document.getElementById('delete-user-' + userId).submit();
         }
     }
+
+    $(document).ready(function() {
+        $('#users-table').DataTable({
+            "lengthMenu": [[3, 10, 100], [3, 10, 100]],
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route('users.data') }}',
+            columns: [{
+                    data: 'id',
+                    name: 'id',
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'email',
+                    name: 'email'
+                },
+                {
+                    data: 'password',
+                    name: 'password',
+                    render: function(data) {
+                        return `******`
+                    }
+                },
+                {
+                    data: 'id',
+                    name: 'id',
+                    render: function(data) {
+                        return `
+                            <a href="/users/edit/${data}" class="btn btn-circle btn-success">Edit</a>
+                            <a href="/users/delete/${data}" class="btn btn-circle btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                            `
+                    }
+                }
+            ]
+        });
+    });
 </script>

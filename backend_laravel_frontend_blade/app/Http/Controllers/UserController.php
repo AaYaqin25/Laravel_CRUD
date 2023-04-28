@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use DataTables;
 
 class UserController extends Controller
 {
@@ -13,11 +14,17 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $users = User::all();
-            return view('loaduser', ['users' => $users]);
+            return view('loaduser');
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Failed to delete user');
         }
+    }
+
+    public function showDataTables()
+    {
+        $users = User::select(['id', 'name', 'email', 'password']);
+
+        return DataTables::of($users)->make(true);
     }
 
     public function show($id)
