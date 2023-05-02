@@ -7,6 +7,17 @@
             <a href="{{ route('users.store') }}" class="btn btn-primary">Tambah User</a>
         </div>
         <div class="card-body">
+            @if (session('success'))
+                <div class="alert alert-success text-center" id="alert-userlist">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <script>
+                setTimeout(function() {
+                    $('#alert-userlist').fadeOut('fast');
+                }, 5000);
+            </script>
             <table class="table" id="users-table">
                 <thead>
                     <tr class="table-secondary">
@@ -18,6 +29,9 @@
                     </tr>
                 </thead>
             </table>
+        </div>
+        <div class="card-footer">
+            <a href="{{route('logout')}}" class="btn btn-warning">Logout</a>
         </div>
     </div>
 </div>
